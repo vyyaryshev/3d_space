@@ -37,9 +37,11 @@ public class PlayerController
 
     // переменные дл€ ввода осей из InputManager
     float horizontalInput, verticalInput, hoverInput;
-    //private int currentGunIndex;
+    private int currentGunIndex;
     private float timer;
     private bool canShoot;
+
+    private AudioSource shootSound;
 
     void Start()
     {
@@ -48,9 +50,10 @@ public class PlayerController
         screenCenter.y = Screen.height * 0.5f;
 
         // ”правление пушками
-        //currentGunIndex = 0;
+        currentGunIndex = 0;
         timer = 0f;
         canShoot = true;
+        shootSound = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -96,26 +99,34 @@ public class PlayerController
         if (!canShoot)
             ReloadTimeControl();
 
+
         if (Input.GetButton("Fire1") && canShoot)
-        {
+        {       
+
+
             foreach (var gun in guns)
             {
-                var newBullet = Instantiate(bulletPrefab, gun.position, gun.rotation);
+                var newBullet = Instantiate(bulletPrefab, guns[currentGunIndex].position, guns[currentGunIndex].rotation);
                 newBullet.transform.LookAt(aimController.aimPosition);
                 canShoot = false;
                 timer = reloadTime;
             }
 
-            //currentGunIndex++;
 
-            //if (currentGunIndex == guns.Length)
-            //    currentGunIndex = 0;
+            shootSound.Play();
+            currentGunIndex++;
+
+            if (currentGunIndex == guns.Length)
+                currentGunIndex = 0;
+
         }
 
         foreach (var engineParticleSystem in this.engineParticleSystems)
         {
             engineParticleSystem.startSpeed = currentForwardSpeed;
-        }         
+        }
+
+
     }
 
     private void ReloadTimeControl()
@@ -127,3 +138,5 @@ public class PlayerController
 
 
 }
+
+
