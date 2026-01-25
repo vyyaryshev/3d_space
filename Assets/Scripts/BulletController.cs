@@ -5,6 +5,7 @@ using UnityEngine;
 public class BulletController : MonoBehaviour
 {
     [SerializeField, Range(1, 10)] int startPower;
+    [SerializeField] int damage;
     Rigidbody rb;
     private void Start()
     {
@@ -15,6 +16,11 @@ public class BulletController : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         print("BulletController.OnCollisionEnter");
+        Health obj = collision.gameObject.GetComponentInParent<Health>();
+        if (obj)
+        {
+            obj.GetDamage(damage);
+        }
         Destroy(gameObject);
     }
 }

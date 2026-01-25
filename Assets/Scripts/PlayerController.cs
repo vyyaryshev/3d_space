@@ -1,5 +1,3 @@
-
-
 using UnityEngine;
 
 public class PlayerController
@@ -20,6 +18,17 @@ public class PlayerController
     [Header("„увствительность мыши")]
     [SerializeField] float lookRateSpeed = 90;
 
+    [Header("Ёффекты двигателей")]
+    [SerializeField] private ParticleSystem[] engineParticleSystems;
+
+    [Header("”правление пушками")]
+    [SerializeField] private Transform[] guns;
+
+    [SerializeField] private BulletController bulletPrefab;
+    [SerializeField, Range(0.1f, 20f)] private float reloadTime;
+
+    [SerializeField] DynamicAimController aimController;
+
     // текуща€ скорость вперед, вверх, текущее вращение
     float currentForwardSpeed, currentHoverSpeed, roll;
 
@@ -28,12 +37,20 @@ public class PlayerController
 
     // переменные дл€ ввода осей из InputManager
     float horizontalInput, verticalInput, hoverInput;
+    //private int currentGunIndex;
+    private float timer;
+    private bool canShoot;
 
     void Start()
     {
         // вычисл€ем центр экрана путем умножени€ высоты и ширины на 0.5
         screenCenter.x = Screen.width * 0.5f;
         screenCenter.y = Screen.height * 0.5f;
+
+        // ”правление пушками
+        //currentGunIndex = 0;
+        timer = 0f;
+        canShoot = true;
     }
 
     void Update()
@@ -73,5 +90,40 @@ public class PlayerController
         transform.position += transform.forward * currentForwardSpeed * Time.deltaTime;
         // двигаем корабль вверх/вниз в зависимости от вычисленного значени€ currentHoverSpeed
         transform.position += transform.up * currentHoverSpeed * Time.deltaTime;
+
+
+        // ”правление пушками
+        if (!canShoot)
+            ReloadTimeControl();
+
+        if (Input.GetButton("Fire1") && canShoot)
+        {
+            foreach (var gun in guns)
+            {
+                var newBullet = Instantiate(bulletPrefab, gun.position, gun.rotation);
+                newBullet.transform.LookAt(aimController.aimPosition);
+                canShoot = false;
+                timer = reloadTime;
+            }
+
+            //currentGunIndex++;
+
+            //if (currentGunIndex == guns.Length)
+            //    currentGunIndex = 0;
+        }
+
+        foreach (var engineParticleSystem in this.engineParticleSystems)
+        {
+            engineParticleSystem.startSpeed = currentForwardSpeed;
+        }         
     }
+
+    private void ReloadTimeControl()
+    {
+        timer -= Time.deltaTime;
+        if (timer <= 0)
+            canShoot = true;
+    }
+
+
 }
